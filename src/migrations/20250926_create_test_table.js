@@ -3,7 +3,7 @@ import db from '../config/db.js';
 export async function up() {
   try {
     await db.query(`
-      CREATE TABLE IF NOT EXISTS test (
+      CREATE TABLE IF NOT EXISTS test24 (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) UNIQUE NOT NULL, 
         email VARCHAR(100) UNIQUE NOT NULL,
@@ -19,8 +19,8 @@ export async function up() {
 export async function alter() {
   try {
     await db.query(`
-        ALTER TABLE test
-        ADD COLUMN status TEXT DEFAULT '';
+        ALTER TABLE users
+        ADD COLUMN statusGame TEXT DEFAULT '';
         `)
   } 
   catch (error) {
@@ -31,7 +31,7 @@ export async function alter() {
 // If created and we don't need anymore use down function to drop table 
 export async function down() { 
   try {
-    await db.query('DROP TABLE IF EXISTS test');
+    await db.query('DROP TABLE "public"."test","test3"');
   } catch (error) {
     console.log(error)
   }
@@ -39,4 +39,4 @@ export async function down() {
 
 // Specify fucntion here
 // command to run: node --env-file=.env src/migrations/20250926_create_test_table.js
-down()
+up()
