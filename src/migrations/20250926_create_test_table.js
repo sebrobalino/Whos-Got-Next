@@ -16,6 +16,18 @@ export async function up() {
   }
 }
 
+export async function alter() {
+  try {
+    await db.query(`
+        ALTER TABLE test
+        ADD COLUMN status TEXT DEFAULT '';
+        `)
+  } 
+  catch (error) {
+    console.log(error)
+  }
+}
+
 // If created and we don't need anymore use down function to drop table 
 export async function down() { 
   try {
@@ -27,4 +39,4 @@ export async function down() {
 
 // Specify fucntion here
 // command to run: node --env-file=.env src/migrations/20250926_create_test_table.js
-up()
+down()
