@@ -31,7 +31,7 @@ export async function alter() {
 // If created and we don't need anymore use down function to drop table 
 export async function down() { 
   try {
-    await db.query('DROP TABLE "public"."test","test3"');
+    await db.query('DROP TABLE "public"."test24"');
   } catch (error) {
     console.log(error)
   }
@@ -39,4 +39,4 @@ export async function down() {
 
 // Specify fucntion here
 // command to run: node --env-file=.env src/migrations/20250926_create_test_table.js
-up()
+down()
