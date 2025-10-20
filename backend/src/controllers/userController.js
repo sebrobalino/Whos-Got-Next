@@ -10,16 +10,17 @@ export const UserController = {
         }
     },
 
-    async getUserById(req, res){
+    async getUserById(req, res, next){
         try{
         const userId = parseInt(req.params.id, 10)
         const user = await UserService.getUserById(userId);
-        res.status(200).json
-        
+        res.status(200).json(user);
         }catch (error){
-            res.status(500).json({ error: 'Internal Server Error' });
+            next(error);
         }
     },
+
+     
 
     async createUser(req, res){
         try{
