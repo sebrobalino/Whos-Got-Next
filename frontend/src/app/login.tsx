@@ -38,7 +38,7 @@ export default function LoginPage() {
       const user = await loginUser({ email, password });
 
       // Handle successful login (e.g., navigate to home screen)
-      router.push("/about");
+      router.push("/home");
     } catch (e: any) {
       Alert.alert("Failure", "Username or password incorrect", [
               { text: "OK", onPress:() => console.log("User acknowledged error") }, // change route as you like
@@ -138,7 +138,7 @@ export default function LoginPage() {
                          {submitting ? (
                            <ActivityIndicator />
                          ) : (
-                           <Text style={{ color: "white", fontWeight: "700" }}>Sign </Text>
+                           <Text style={{ color: "white", fontWeight: "700" }}>Sign in</Text>
                          )}
                        </Pressable>
           </View>
