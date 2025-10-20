@@ -1,6 +1,7 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 
 type CourtStatus = "open" | "active" | "full";
 type Screen = "courts" | "details" | "myrun" | "profile";
@@ -141,7 +142,10 @@ export default function HomeScreen() {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Pressable onPress={() => setCurrent("courts")} style={styles.backRow}>
+          <Pressable
+            onPress={() => setCurrent("courts")}
+            style={styles.backRow}
+          >
             <Ionicons name="chevron-back" size={20} color="#f97316" />
             <Text style={styles.backText}>Back</Text>
           </Pressable>
@@ -188,7 +192,10 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
 
-          <Pressable onPress={() => setCurrent("courts")} style={styles.ghostBtn}>
+          <Pressable
+            onPress={() => setCurrent("courts")}
+            style={styles.ghostBtn}
+          >
             <Text style={styles.ghostBtnText}>Cancel</Text>
           </Pressable>
         </View>
@@ -204,12 +211,17 @@ export default function HomeScreen() {
         {userQueue ? (
           <View>
             <View style={styles.banner}>
-              <Text style={styles.bannerCourt}>Court {userQueue.court.number}</Text>
+              <Text style={styles.bannerCourt}>
+                Court {userQueue.court.number}
+              </Text>
               <Text style={styles.bannerPos}>You’re #{userQueue.position}</Text>
 
               <View style={styles.rowCenter}>
                 <Ionicons name="time-outline" size={18} color="#fff" />
-                <Text style={styles.bannerEta}> ETA ~{userQueue.eta} minutes</Text>
+                <Text style={styles.bannerEta}>
+                  {" "}
+                  ETA ~{userQueue.eta} minutes
+                </Text>
               </View>
 
               <View style={styles.progressTrack}>
@@ -240,7 +252,10 @@ export default function HomeScreen() {
             <Text style={styles.emptyTitle}>Not in Queue</Text>
             <Text style={styles.mediumGray}>Join a court to start playing</Text>
 
-            <Pressable onPress={() => setCurrent("courts")} style={styles.findBtn}>
+            <Pressable
+              onPress={() => setCurrent("courts")}
+              style={styles.findBtn}
+            >
               <Text style={styles.findBtnText}>Find Courts</Text>
             </Pressable>
           </View>
@@ -268,7 +283,9 @@ export default function HomeScreen() {
             <Text style={styles.rowItemText}>Notifications</Text>
           </Pressable>
           <Pressable style={[styles.rowItem, styles.rowItemDanger]}>
-            <Text style={[styles.rowItemText, { color: "#ef4444" }]}>Log Out</Text>
+            <Text style={[styles.rowItemText, { color: "#ef4444" }]}>
+              Log Out
+            </Text>
           </Pressable>
         </View>
       </View>
@@ -278,8 +295,15 @@ export default function HomeScreen() {
   const BottomNav = () => (
     <View style={styles.navBar}>
       <Pressable onPress={() => setCurrent("courts")} style={styles.navItem}>
-        <Text style={{ fontSize: 22, opacity: current === "courts" ? 1 : 0.4 }}>🏀</Text>
-        <Text style={[styles.navLabel, current === "courts" ? styles.navActive : null]}>
+        <Text style={{ fontSize: 22, opacity: current === "courts" ? 1 : 0.4 }}>
+          🏀
+        </Text>
+        <Text
+          style={[
+            styles.navLabel,
+            current === "courts" ? styles.navActive : null,
+          ]}
+        >
           Courts
         </Text>
       </Pressable>
@@ -290,23 +314,40 @@ export default function HomeScreen() {
           size={26}
           color={current === "myrun" ? "#f97316" : "#d1d5db"}
         />
-        <Text style={[styles.navLabel, current === "myrun" ? styles.navActive : null]}>
+        <Text
+          style={[
+            styles.navLabel,
+            current === "myrun" ? styles.navActive : null,
+          ]}
+        >
           My Run
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => setCurrent("profile")} style={styles.navItem}>
+      <Pressable onPress={() => router.push("/profile")} style={styles.navItem}>
         <View
           style={[
             styles.navAvatar,
-            current === "profile" ? { backgroundColor: "#f97316" } : { backgroundColor: "#d1d5db" },
+            current === "profile"
+              ? { backgroundColor: "#f97316" }
+              : { backgroundColor: "#d1d5db" },
           ]}
         >
-          <Text style={{ fontWeight: "700", color: current === "profile" ? "#fff" : "#6b7280" }}>
-            JD
+          <Text
+            style={{
+              fontWeight: "700",
+              color: current === "profile" ? "#fff" : "#6b7280",
+            }}
+          >
+            JDs
           </Text>
         </View>
-        <Text style={[styles.navLabel, current === "profile" ? styles.navActive : null]}>
+        <Text
+          style={[
+            styles.navLabel,
+            current === "profile" ? styles.navActive : null,
+          ]}
+        >
           Profile
         </Text>
       </Pressable>
@@ -327,7 +368,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-    rowItem: {
+  rowItem: {
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderWidth: 2,
@@ -381,7 +422,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
   },
-  cardTitle: { fontSize: 16, fontWeight: "700", color: "#111827", marginBottom: 12 },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 12,
+  },
   waitingNum: { fontSize: 40, fontWeight: "800", marginBottom: 4 },
   waitingLabel: { fontSize: 12, color: "#6b7280", fontWeight: "600" },
   pill: {
@@ -409,7 +455,12 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
   },
-  bigOrange: { fontSize: 48, fontWeight: "900", color: "#f97316", marginBottom: 4 },
+  bigOrange: {
+    fontSize: 48,
+    fontWeight: "900",
+    color: "#f97316",
+    marginBottom: 4,
+  },
   mediumGray: { color: "#4b5563", fontWeight: "500" },
   rowCenter: { flexDirection: "row", alignItems: "center" },
 
@@ -442,8 +493,18 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 16,
   },
-  bannerCourt: { color: "#fff", fontWeight: "600", opacity: 0.9, marginBottom: 6 },
-  bannerPos: { color: "#fff", fontSize: 32, fontWeight: "900", marginBottom: 12 },
+  bannerCourt: {
+    color: "#fff",
+    fontWeight: "600",
+    opacity: 0.9,
+    marginBottom: 6,
+  },
+  bannerPos: {
+    color: "#fff",
+    fontSize: 32,
+    fontWeight: "900",
+    marginBottom: 12,
+  },
   bannerEta: { color: "#fff", fontSize: 16 },
 
   progressTrack: {
@@ -482,7 +543,12 @@ const styles = StyleSheet.create({
   leaveBtnText: { color: "#ef4444", fontWeight: "800" },
 
   emptyWrap: { alignItems: "center", paddingVertical: 40, gap: 8 },
-  emptyTitle: { fontSize: 18, fontWeight: "800", color: "#111827", marginBottom: 4 },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: 4,
+  },
   findBtn: {
     marginTop: 12,
     backgroundColor: "#f97316",
