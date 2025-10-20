@@ -1,6 +1,6 @@
 // app/login.tsx
 import { useState } from "react";
-import { Link } from "expo-router";
+import { Link,Router, useRouter } from "expo-router";
 import {
   SafeAreaView,
   KeyboardAvoidingView,
@@ -9,14 +9,42 @@ import {
   Text,
   TextInput,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
+
+import { loginUser } from "./services/userService";
 
 export default function LoginPage() {
   // purely for visuals (to show enabled/disabled button states)
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const canSubmit = email.length > 0 && password.length > 0;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+
+    setSubmitting(true);
+    setError(null);
+
+
+    try {
+      const user = await loginUser({ email, password });
+
+      // Handle successful login (e.g., navigate to home screen)
+      router.push("/about");
+    } catch (error) {
+      // Handle login error (e.g., show error message)
+      console.error("Login failed:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -92,17 +120,25 @@ export default function LoginPage() {
             </View>
 
             {/* Submit button (visual only) */}
-            <Pressable
-              disabled={!canSubmit}
-              style={{
-                backgroundColor: canSubmit ? "#111827" : "#9ca3af",
-                paddingVertical: 14,
-                borderRadius: 12,
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: "white", fontWeight: "700" }}>Sign in</Text>
-            </Pressable>
+           <Pressable
+                         onPress={handleSubmit}
+                         disabled={!canSubmit}
+                         style={{
+                           backgroundColor: canSubmit ? "#111827" : "#9ca3af",
+                           paddingVertical: 14,
+                           borderRadius: 12,
+                           alignItems: "center",
+                           flexDirection: "row",
+                           justifyContent: "center",
+                           gap: 8,
+                         }}
+                       >
+                         {submitting ? (
+                           <ActivityIndicator />
+                         ) : (
+                           <Text style={{ color: "white", fontWeight: "700" }}>Sign </Text>
+                         )}
+                       </Pressable>
           </View>
 
           {/* Footer */}
