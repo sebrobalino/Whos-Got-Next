@@ -1,6 +1,6 @@
-// app/login.tsx
+// app/login.tsx (your RegisterPage component)
 import { useState } from "react";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import {
   SafeAreaView,
   KeyboardAvoidingView,
@@ -9,14 +9,38 @@ import {
   Text,
   TextInput,
   Pressable,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
+import { createUser } from "./services/userService"; // <-- adjust path if needed
 
 export default function RegisterPage() {
-  // purely for visuals (to show enabled/disabled button states)
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
 
-  const canSubmit = email.length > 0 && password.length > 0;
+  const [name, setName] = useState("");       // added
+  const [email, setEmail] = useState("");     // keep
+  const [password, setPassword] = useState(""); // keep
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const canSubmit = !!name && !!email && !!password && !submitting;
+
+  const onSignUp = async () => {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createUser({ name: name.trim(), email: email.trim(), password });
+      Alert.alert("Success", "Account created!", [
+        { text: "OK", onPress: () => router.replace("/login") }, // change route as you like
+      ]);
+    } catch (e: any) {
+      setError(e?.message ?? "Sign up failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -48,16 +72,15 @@ export default function RegisterPage() {
               gap: 16,
             }}
           >
-            {/* Email */}
+            {/* Name */}
             <View style={{ gap: 8 }}>
               <Text style={{ fontWeight: "600" }}>Name</Text>
               <TextInput
                 placeholder="Albert Gator"
-                keyboardType="email-address"
-                autoCapitalize="none"
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
                 autoCorrect={false}
-                value={email}
-                onChangeText={setEmail}
                 style={{
                   borderWidth: 1,
                   borderColor: "#e5e7eb",
@@ -106,22 +129,37 @@ export default function RegisterPage() {
               />
             </View>
 
-            
+            {/* Error (if any) */}
+            {error ? (
+              <Text style={{ color: "#dc2626" }}>{error}</Text>
+            ) : null}
 
-            {/* Submit button (visual only) */}
+            {/* Submit */}
             <Pressable
+              onPress={onSignUp}
               disabled={!canSubmit}
               style={{
                 backgroundColor: canSubmit ? "#111827" : "#9ca3af",
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                gap: 8,
               }}
             >
-              <Text style={{ color: "white", fontWeight: "700" }}>Sign up</Text>
+              {submitting ? (
+                <ActivityIndicator />
+              ) : (
+                <Text style={{ color: "white", fontWeight: "700" }}>Sign up</Text>
+              )}
             </Pressable>
-          </View>
 
+            {/* Already have an account */}
+            <Text style={{ textAlign: "center", color: "#6b7280" }}>
+              Already have an account? <Link href="/login">Sign in</Link>
+            </Text>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
