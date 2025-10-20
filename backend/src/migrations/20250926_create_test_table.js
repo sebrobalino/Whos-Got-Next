@@ -3,7 +3,7 @@ import db from '../config/db.js';
 export async function up() {
   try {
     await db.query(`
-      CREATE TABLE IF NOT EXISTS test24 (
+      CREATE TABLE IF NOT EXISTS Usertest (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) UNIQUE NOT NULL, 
         email VARCHAR(100) UNIQUE NOT NULL,
@@ -39,4 +39,4 @@ export async function down() {
 
 // Specify fucntion here
 // command to run: node --env-file=.env src/migrations/20250926_create_test_table.js
-down()
+up ()
