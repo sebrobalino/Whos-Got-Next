@@ -1,6 +1,7 @@
-// app/login.tsx
 import { useState } from "react";
+import { loginUser } from "./services/userService";
 import { Link,Router, useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   SafeAreaView,
   KeyboardAvoidingView,
@@ -13,7 +14,6 @@ import {
   Alert,
 } from "react-native";
 
-import { loginUser } from "./services/userService";
 
 export default function LoginPage() {
   // purely for visuals (to show enabled/disabled button states)
@@ -36,6 +36,8 @@ export default function LoginPage() {
 
     try {
       const user = await loginUser({ email, password });
+
+      await AsyncStorage.setItem("user", JSON.stringify(user))
 
       // Handle successful login (e.g., navigate to home screen)
       router.push("/home");
