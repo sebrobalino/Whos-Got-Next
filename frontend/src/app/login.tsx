@@ -10,6 +10,7 @@ import {
   TextInput,
   Pressable,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 import { loginUser } from "./services/userService";
@@ -38,9 +39,10 @@ export default function LoginPage() {
 
       // Handle successful login (e.g., navigate to home screen)
       router.push("/about");
-    } catch (error) {
-      // Handle login error (e.g., show error message)
-      console.error("Login failed:", error);
+    } catch (e: any) {
+      Alert.alert("Failure", "Username or password incorrect", [
+              { text: "OK", onPress:() => console.log("User acknowledged error") }, // change route as you like
+            ]);
     } finally {
       setSubmitting(false);
     }
