@@ -11,10 +11,10 @@ export const UserModel = {
 
     },
 
-    async create({username,email,password}){
+    async create({name,email,password}){
         const result = await db.query(
             'INSERT INTO usertest(name,email,password) VALUES($1,$2,$3) RETURNING*',
-            [username,email,password]
+            [name,email,password]
         );
         return result.rows[0];
 
@@ -30,6 +30,11 @@ export const UserModel = {
     async delete(userId){
         const result = await db.query('DELETE FROM usertest WHERE id = $1', [userId]);
         return result.rowCount;
-    }
+    },
+
+     async findByEmail(email) {
+        const result = await db.query('SELECT * FROM usertest WHERE email = $1', [email]);
+        return result.rows[0];
+  },
 
 };

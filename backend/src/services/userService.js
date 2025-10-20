@@ -1,4 +1,7 @@
 import { UserModel } from "../models/userModles.js";
+import CustomError from "../utils/CustomError.js";
+import ERROR_MESSAGES from '../constants/errorMessages.js';
+
 
 export const UserService = {
     async getAllUsers(){
@@ -17,9 +20,9 @@ export const UserService = {
 
     async createUser(newUser){
         // Logic to create a new user in the database
-        const { username,email,password} = newUser;
+        const { name,email,password} = newUser;
         const sanitizedUser = {
-            name: username?.trim(),
+            name: name?.trim(),
             email: email?.trim().toLowerCase(),
             password: password?.trim()
         };
@@ -44,12 +47,43 @@ export const UserService = {
         RETURNING *;
         `;
 
+         const updatedUser = await UserModel.update(query, values);
+        if (!updatedUser) throw new CustomError(ERROR_MESSAGES.NOT_FOUND, 404);
+        return updatedUser;
+
     },
 
     async deleteUser(userId){
-        // Logic to delete a user from the database
-        return UserModel.delete(userId);
-    }   
+    // Logic to delete a user from the database
+    
+
+    const user = await UserModel.findByID(userId);
+
+    if (!user) {
+      throw new CustomError(ERROR_MESSAGES.NOT_FOUND, 404);
+    }
+
+   
+
+    const rowCount = await UserModel.delete(userId);
+
+    if (rowCount === 0) {
+      throw new CustomError(ERROR_MESSAGES.INTERNAL_SERVER_ERROR, 500);
+    }
+
+    return { message: 'User deleted successfully' };
+
+    },
+
+    async loginUser(email, password) {
+    const user = await UserModel.findByEmail(email);
+    if (!user) return null;
+
+    // ⚠️ If you’re storing hashed passwords, verify them with bcrypt here
+    if (user.password !== password) return null;
+
+    return user; // or generate a JWT if you want sessions
+  },
 
 
 
