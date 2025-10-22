@@ -10,6 +10,7 @@ type Court = {
   id: number;
   number: number;
   waiting: number;
+  playing: number;
   eta: number; // minutes
   status: CourtStatus;
 };
@@ -21,12 +22,12 @@ type QueueState = {
 };
 
 const COURTS: Court[] = [
-  { id: 1, number: 1, waiting: 4, eta: 8, status: "open" },
-  { id: 2, number: 2, waiting: 8, eta: 16, status: "active" },
-  { id: 3, number: 3, waiting: 2, eta: 4, status: "open" },
-  { id: 4, number: 4, waiting: 12, eta: 24, status: "full" },
-  { id: 5, number: 5, waiting: 6, eta: 12, status: "active" },
-  { id: 6, number: 6, waiting: 0, eta: 0, status: "open" },
+  { id: 1, number: 1, waiting: 4, playing: 6, eta: 8, status: "open" },
+  { id: 2, number: 2, waiting: 8, playing: 8, eta: 16, status: "active" },
+  { id: 3, number: 3, waiting: 2, playing: 10, eta: 4, status: "open" },
+  { id: 4, number: 4, waiting: 12, playing: 10, eta: 24, status: "full" },
+  { id: 5, number: 5, waiting: 6, playing: 2, eta: 12, status: "active" },
+  { id: 6, number: 6, waiting: 0, playing: 10, eta: 0, status: "open" },
 ];
 
 const statusColor = (status: CourtStatus) => {
@@ -34,7 +35,7 @@ const statusColor = (status: CourtStatus) => {
     case "open":
       return "#10B981"; // green
     case "active":
-      return "#F59E0B"; // amber
+      return "#4858edff"; // amber
     case "full":
       return "#EF4444"; // red
     default:
@@ -270,10 +271,10 @@ export default function HomeScreen() {
         <Text style={styles.h1}>Profile</Text>
 
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>JD</Text>
+          <Text style={styles.avatarText}>AG</Text>
         </View>
-        <Text style={styles.profileName}>Jordan Davis</Text>
-        <Text style={styles.subtle}>jordan@email.com</Text>
+        <Text style={styles.profileName}>Albert Gator</Text>
+        <Text style={styles.subtle}>albert@email.com</Text>
 
         <View style={{ gap: 12, marginTop: 24 }}>
           <Pressable style={styles.rowItem}>
@@ -411,8 +412,9 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16,
     justifyContent: "space-between",
+    width: "100%",
+    alignItems: "flex-start",
   },
   card: {
     width: "48%",
@@ -421,6 +423,7 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     borderRadius: 16,
     padding: 16,
+    marginBottom: 16,
   },
   cardTitle: {
     fontSize: 16,
