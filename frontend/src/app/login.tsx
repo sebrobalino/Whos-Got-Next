@@ -1,6 +1,7 @@
-// app/login.tsx
 import { useState } from "react";
+import { loginUser } from "./services/userService";
 import { Link,Router, useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   SafeAreaView,
   KeyboardAvoidingView,
@@ -10,9 +11,9 @@ import {
   TextInput,
   Pressable,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
-import { loginUser } from "./services/userService";
 
 export default function LoginPage() {
   // purely for visuals (to show enabled/disabled button states)
@@ -36,11 +37,14 @@ export default function LoginPage() {
     try {
       const user = await loginUser({ email, password });
 
+      await AsyncStorage.setItem("user", JSON.stringify(user))
+
       // Handle successful login (e.g., navigate to home screen)
-      router.push("/about");
-    } catch (error) {
-      // Handle login error (e.g., show error message)
-      console.error("Login failed:", error);
+      router.push("/home");
+    } catch (e: any) {
+      Alert.alert("Failure", "Username or password incorrect", [
+              { text: "OK", onPress:() => console.log("User acknowledged error") }, // change route as you like
+            ]);
     } finally {
       setSubmitting(false);
     }
@@ -136,7 +140,7 @@ export default function LoginPage() {
                          {submitting ? (
                            <ActivityIndicator />
                          ) : (
-                           <Text style={{ color: "white", fontWeight: "700" }}>Sign </Text>
+                           <Text style={{ color: "white", fontWeight: "700" }}>Sign in</Text>
                          )}
                        </Pressable>
           </View>
