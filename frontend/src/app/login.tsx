@@ -12,6 +12,7 @@ import {
   Pressable,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 
 
@@ -57,9 +58,14 @@ export default function LoginPage() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <View style={{ flex: 1, padding: 24, gap: 24, justifyContent: "center" }}>
+          {/* Logo */}
+          <View style={{ alignItems: "center", marginBottom: 8 }}>
+            <Image source={require("../../assets/gator.png")} style={{ width: 140, height: 140, resizeMode: "contain" }} />
+          </View>
+
           {/* Header */}
-          <View style={{ gap: 8 }}>
-            <Text style={{ fontSize: 32, fontWeight: "800", textAlign: "center" }}>
+          <View style={{ gap: 8, alignItems: "center" }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", textAlign: "center" }}>
               Who's Got Next 
             </Text>
             <Text style={{ textAlign: "center", color: "#6b7280" }}>
@@ -70,7 +76,7 @@ export default function LoginPage() {
           {/* Card */}
           <View
             style={{
-              backgroundColor: "#f9fafb",
+              backgroundColor: "#fff",
               padding: 20,
               borderRadius: 16,
               shadowColor: "#000",
@@ -128,7 +134,7 @@ export default function LoginPage() {
                          onPress={handleSubmit}
                          disabled={!canSubmit}
                          style={{
-                           backgroundColor: canSubmit ? "#111827" : "#9ca3af",
+                           backgroundColor: canSubmit ? "#f97316" : "#9ca3af",
                            paddingVertical: 14,
                            borderRadius: 12,
                            alignItems: "center",
@@ -138,7 +144,7 @@ export default function LoginPage() {
                          }}
                        >
                          {submitting ? (
-                           <ActivityIndicator />
+                           <ActivityIndicator color="#fff" />
                          ) : (
                            <Text style={{ color: "white", fontWeight: "700" }}>Sign in</Text>
                          )}
