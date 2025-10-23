@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, Image } from "react-native";
 import BottomNav from "./componets/BottomNav";
 const BottomNavAny: any = BottomNav;
 
@@ -82,6 +82,7 @@ export default function HomeScreen() {
   const Courts = () => (
     <View style={styles.container}>
       <View style={styles.header}>
+  <Image source={require("../../assets/gator.png")} style={styles.topIcon} />
         <Text style={styles.h1}>Who’s Got Next?</Text>
         <Text style={styles.subtle}>Select your court to queue up.</Text>
       </View>
@@ -289,6 +290,14 @@ const styles = StyleSheet.create({
   screenWrap: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  topIcon: {
+    position: "absolute",
+    top: 12,
+    right: 24,
+    width: 72,
+    height: 72,
+    resizeMode: "contain",
   },
   container: {
     flex: 1,
