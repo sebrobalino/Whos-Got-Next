@@ -1,10 +1,13 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
+import BottomNav from "./componets/BottomNav";
+const BottomNavAny: any = BottomNav;
 
 type CourtStatus = "open" | "active" | "full";
-type Screen = "courts" | "details" | "myrun" | "profile";
+type Screen = "courts" | "details" | "myrun";
 
 type Court = {
   id: number;
@@ -59,16 +62,21 @@ const statusLabel = (status: CourtStatus) => {
 export default function HomeScreen() {
   const [current, setCurrent] = useState<Screen>("courts");
   const [selected, setSelected] = useState<Court | null>(null);
-  const [userQueue, setUserQueue] = useState<QueueState | null>(null);
 
-  const joinQueue = () => {
+  const joinQueue = async () => {
     if (!selected) return;
-    setUserQueue({
+    const queue: QueueState = {
       court: selected,
       position: selected.waiting + 1,
       eta: selected.eta + 2,
-    });
-    setCurrent("myrun");
+    };
+    try {
+      await AsyncStorage.setItem("userQueue", JSON.stringify(queue));
+    } catch (e) {
+      console.warn("Failed to persist queue", e);
+    }
+    // navigate to the standalone My Run page
+    router.push("/myrun");
   };
 
   const Courts = () => (
@@ -204,94 +212,9 @@ export default function HomeScreen() {
     );
   };
 
-  const MyRun = () => (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.h1}>My Run</Text>
+  /* MyRun page now lives in its own route: frontend/src/app/myrun.tsx */
 
-        {userQueue ? (
-          <View>
-            <View style={styles.banner}>
-              <Text style={styles.bannerCourt}>
-                Court {userQueue.court.number}
-              </Text>
-              <Text style={styles.bannerPos}>You’re #{userQueue.position}</Text>
-
-              <View style={styles.rowCenter}>
-                <Ionicons name="time-outline" size={18} color="#fff" />
-                <Text style={styles.bannerEta}>
-                  {" "}
-                  ETA ~{userQueue.eta} minutes
-                </Text>
-              </View>
-
-              <View style={styles.progressTrack}>
-                <View style={styles.progressFill} />
-              </View>
-            </View>
-
-            {userQueue.position <= 2 && (
-              <View style={styles.soonCard}>
-                <Text style={styles.soonTitle}>You’re Up Soon!</Text>
-                <Text style={styles.soonText}>Get ready to play</Text>
-              </View>
-            )}
-
-            <Pressable
-              onPress={() => {
-                setUserQueue(null);
-                setCurrent("courts");
-              }}
-              style={styles.leaveBtn}
-            >
-              <Text style={styles.leaveBtnText}>Leave Queue</Text>
-            </Pressable>
-          </View>
-        ) : (
-          <View style={styles.emptyWrap}>
-            <Text style={{ fontSize: 64, marginBottom: 8 }}>🏀</Text>
-            <Text style={styles.emptyTitle}>Not in Queue</Text>
-            <Text style={styles.mediumGray}>Join a court to start playing</Text>
-
-            <Pressable
-              onPress={() => setCurrent("courts")}
-              style={styles.findBtn}
-            >
-              <Text style={styles.findBtnText}>Find Courts</Text>
-            </Pressable>
-          </View>
-        )}
-      </View>
-    </View>
-  );
-
-  const Profile = () => (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.h1}>Profile</Text>
-
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>AG</Text>
-        </View>
-        <Text style={styles.profileName}>Albert Gator</Text>
-        <Text style={styles.subtle}>albert@email.com</Text>
-
-        <View style={{ gap: 12, marginTop: 24 }}>
-          <Pressable style={styles.rowItem}>
-            <Text style={styles.rowItemText}>Queue History</Text>
-          </Pressable>
-          <Pressable style={styles.rowItem}>
-            <Text style={styles.rowItemText}>Notifications</Text>
-          </Pressable>
-          <Pressable style={[styles.rowItem, styles.rowItemDanger]}>
-            <Text style={[styles.rowItemText, { color: "#ef4444" }]}>
-              Log Out
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-    </View>
-  );
+  /* Profile view moved to dedicated `profile.tsx` file. */
 
   const BottomNav = () => (
     <View style={styles.navBar}>
@@ -309,7 +232,7 @@ export default function HomeScreen() {
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => setCurrent("myrun")} style={styles.navItem}>
+      <Pressable onPress={() => router.push('/myrun')} style={styles.navItem}>
         <Ionicons
           name="time-outline"
           size={26}
@@ -326,31 +249,10 @@ export default function HomeScreen() {
       </Pressable>
 
       <Pressable onPress={() => router.push("/profile")} style={styles.navItem}>
-        <View
-          style={[
-            styles.navAvatar,
-            current === "profile"
-              ? { backgroundColor: "#f97316" }
-              : { backgroundColor: "#d1d5db" },
-          ]}
-        >
-          <Text
-            style={{
-              fontWeight: "700",
-              color: current === "profile" ? "#fff" : "#6b7280",
-            }}
-          >
-            JDs
-          </Text>
+        <View style={[styles.navAvatar, { backgroundColor: "#d1d5db" }]}>
+          <Text style={{ fontWeight: "700", color: "#6b7280" }}>JDs</Text>
         </View>
-        <Text
-          style={[
-            styles.navLabel,
-            current === "profile" ? styles.navActive : null,
-          ]}
-        >
-          Profile
-        </Text>
+        <Text style={styles.navLabel}>Profile</Text>
       </Pressable>
     </View>
   );
@@ -358,12 +260,11 @@ export default function HomeScreen() {
   return (
     <View style={styles.screenWrap}>
       <View style={{ flex: 1 }}>
-        {current === "courts" && <Courts />}
-        {current === "details" && <Details />}
-        {current === "myrun" && <MyRun />}
-        {current === "profile" && <Profile />}
+  {current === "courts" && <Courts />}
+  {current === "details" && <Details />}
+  {/* Profile handled by separate /profile route */}
       </View>
-      <BottomNav />
+  <BottomNavAny homeTab={current} />
     </View>
   );
 }
