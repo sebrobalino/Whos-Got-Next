@@ -3,11 +3,11 @@ import db from '../config/db.js';
 export async function up() {
   try {
     await db.query(`
-      CREATE TABLE IF NOT EXISTS Usertest (
+      CREATE TABLE IF NOT EXISTS Groups (
         id SERIAL PRIMARY KEY,
-        name VARCHAR(100) UNIQUE NOT NULL, 
-        email VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(100) UNIQUE, 
+        group_name VARCHAR(100) NOT NULL,
+        court_id INT REFERENCES Courts(id) on DELETE SET NULL,
+        priority BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -19,8 +19,8 @@ export async function up() {
 export async function alter() {
   try {
     await db.query(`
-        ALTER TABLE usertest
-        ADD COLUMN  group_id INT REFERENCES groups(id) ON DELETE SET NULL;
+        ALTER TABLE groups
+        ADD COLUMN status VARCHAR(20) DEFAULT 'queued';
         `)
   } 
   catch (error) {
@@ -31,12 +31,12 @@ export async function alter() {
 // If created and we don't need anymore use down function to drop table 
 export async function down() { 
   try {
-    await db.query('DROP TABLE "public"."test24"');
+    await db.query('DROP TABLE "public"."Groups"');
   } catch (error) {
     console.log(error)
   }
 }
 
 // Specify fucntion here
-// command to run: node --env-file=.env src/migrations/20250926_create_test_table.js
-alter ()
+// command to run: node --env-file=.env src/migrations/20251022_create_groups_table.js
+alter()
