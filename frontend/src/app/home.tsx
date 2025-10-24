@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { View, Text, ScrollView, Pressable, StyleSheet, Image } from "react-native";
+import JoinQueueModal from "./componets/JoinQueueModal";
 import BottomNav from "./componets/BottomNav";
 const BottomNavAny: any = BottomNav;
 
@@ -62,6 +63,8 @@ const statusLabel = (status: CourtStatus) => {
 export default function HomeScreen() {
   const [current, setCurrent] = useState<Screen>("courts");
   const [selected, setSelected] = useState<Court | null>(null);
+  const [joinModalVisible, setJoinModalVisible] = useState(false);
+  const currentUserName = "Player";
 
   const joinQueue = async () => {
     if (!selected) return;
@@ -77,6 +80,62 @@ export default function HomeScreen() {
     }
     // navigate to the standalone My Run page
     router.push("/myrun");
+  };
+
+  // Handlers for modal actions
+  const handleSolo = async () => {
+    await joinQueue();
+    setJoinModalVisible(false);
+  };
+
+  const handleCreateGroup = async (groupName: string, groupId: string) => {
+    if (!selected) return;
+    // Reuse same local queue behavior and augment navigation with group params
+    const queue: QueueState = {
+      court: selected,
+      position: selected.waiting + 1,
+      eta: selected.eta + 2,
+    };
+    try {
+      await AsyncStorage.setItem("userQueue", JSON.stringify(queue));
+    } catch (e) {
+      console.warn("Failed to persist queue (group create)", e);
+    }
+    setJoinModalVisible(false);
+    router.push({
+      pathname: "/myrun",
+      params: {
+        courtId: String(selected.id),
+        isSolo: "false",
+        isGroup: "true",
+        groupId,
+        groupName,
+      },
+    });
+  };
+
+  const handleJoinGroup = async (groupId: string) => {
+    if (!selected) return;
+    const queue: QueueState = {
+      court: selected,
+      position: selected.waiting + 1,
+      eta: selected.eta + 2,
+    };
+    try {
+      await AsyncStorage.setItem("userQueue", JSON.stringify(queue));
+    } catch (e) {
+      console.warn("Failed to persist queue (group join)", e);
+    }
+    setJoinModalVisible(false);
+    router.push({
+      pathname: "/myrun",
+      params: {
+        courtId: String(selected.id),
+        isSolo: "false",
+        isGroup: "true",
+        groupId,
+      },
+    });
   };
 
   const Courts = () => (
@@ -185,7 +244,7 @@ export default function HomeScreen() {
 
         <View style={styles.footerButtons}>
           <Pressable
-            onPress={joinQueue}
+            onPress={() => setJoinModalVisible(true)}
             disabled={selected.status === "full"}
             style={[
               styles.primaryBtn,
@@ -266,6 +325,15 @@ export default function HomeScreen() {
   {/* Profile handled by separate /profile route */}
       </View>
   <BottomNavAny homeTab={current} />
+      {/* Join Queue Modal */}
+      <JoinQueueModal
+        visible={joinModalVisible}
+        onClose={() => setJoinModalVisible(false)}
+        onSolo={handleSolo}
+        onCreateGroup={handleCreateGroup}
+        onJoinGroup={handleJoinGroup}
+        currentUserName={currentUserName}
+      />
     </View>
   );
 }
