@@ -65,6 +65,7 @@ export default function HomeScreen() {
   const [selected, setSelected] = useState<Court | null>(null);
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const currentUserName = "Player";
+  const currentUserId = "me-123456"; // TODO: replace with real auth user id
 
   const joinQueue = async () => {
     if (!selected) return;
@@ -78,14 +79,27 @@ export default function HomeScreen() {
     } catch (e) {
       console.warn("Failed to persist queue", e);
     }
-    // navigate to the standalone My Run page
-    router.push("/myrun");
+    // navigation handled by the specific action handlers (solo/group)
   };
 
   // Handlers for modal actions
   const handleSolo = async () => {
+    // Reuse local join logic, then navigate with group params
     await joinQueue();
     setJoinModalVisible(false);
+    const soloSuffix = (currentUserId || "user").toString().slice(0, 6).toUpperCase();
+    const groupId = `GROUP-SOLO-${soloSuffix}`;
+    router.push({
+      pathname: "/myrun",
+      params: {
+        courtId: selected ? String(selected.id) : "",
+        isSolo: "true",
+        isGroup: "false",
+        groupId,
+        groupName: currentUserName,
+        groupSize: "1",
+      },
+    });
   };
 
   const handleCreateGroup = async (groupName: string, groupId: string) => {
@@ -110,6 +124,7 @@ export default function HomeScreen() {
         isGroup: "true",
         groupId,
         groupName,
+        groupSize: "1",
       },
     });
   };
@@ -134,6 +149,8 @@ export default function HomeScreen() {
         isSolo: "false",
         isGroup: "true",
         groupId,
+        groupName: `${currentUserName}'s group`,
+        groupSize: "3",
       },
     });
   };
