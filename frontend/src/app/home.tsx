@@ -1,16 +1,27 @@
 import { router } from "expo-router";
-import React, { useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import { View, Text, ScrollView, Pressable, StyleSheet, Image } from "react-native";
-import JoinQueueModal from "./componets/JoinQueueModal";
+import React, { useEffect, useState } from "react";
 import BottomNav from "./componets/BottomNav";
+import { Ionicons } from "@expo/vector-icons";
+import JoinQueueModal from "./componets/JoinQueueModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  Image,
+} from "react-native";
+import { getCourts } from "./services/courtService";
+
 const BottomNavAny: any = BottomNav;
 
 type CourtStatus = "open" | "active" | "full";
 type Screen = "courts" | "details" | "myrun";
 
 type Court = {
+  name: string;
+  location: string;
   id: number;
   number: number;
   waiting: number;
@@ -25,14 +36,14 @@ type QueueState = {
   eta: number; // minutes
 };
 
-const COURTS: Court[] = [
-  { id: 1, number: 1, waiting: 4, playing: 6, eta: 8, status: "open" },
-  { id: 2, number: 2, waiting: 8, playing: 8, eta: 16, status: "active" },
-  { id: 3, number: 3, waiting: 2, playing: 10, eta: 4, status: "open" },
-  { id: 4, number: 4, waiting: 12, playing: 10, eta: 24, status: "full" },
-  { id: 5, number: 5, waiting: 6, playing: 2, eta: 12, status: "active" },
-  { id: 6, number: 6, waiting: 0, playing: 10, eta: 0, status: "open" },
-];
+// const COURTS: Court[] = [
+//   { id: 1, number: 1, waiting: 4, playing: 6, eta: 8, status: "open" },
+//   { id: 2, number: 2, waiting: 8, playing: 8, eta: 16, status: "active" },
+//   { id: 3, number: 3, waiting: 2, playing: 10, eta: 4, status: "open" },
+//   { id: 4, number: 4, waiting: 12, playing: 10, eta: 24, status: "full" },
+//   { id: 5, number: 5, waiting: 6, playing: 2, eta: 12, status: "active" },
+//   { id: 6, number: 6, waiting: 0, playing: 10, eta: 0, status: "open" },
+// ];
 
 const statusColor = (status: CourtStatus) => {
   switch (status) {
@@ -66,6 +77,25 @@ export default function HomeScreen() {
   const [joinModalVisible, setJoinModalVisible] = useState(false);
   const currentUserName = "Player";
   const currentUserId = "me-123456"; // TODO: replace with real auth user id
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadCourts() {
+      try {
+        setLoading(true);
+        const data = await getCourts(); // ✅ using imported function
+        setCourts(data);
+      } catch (err: any) {
+        setError(err.message || "Failed to load courts");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCourts();
+  }, []);
 
   const joinQueue = async () => {
     if (!selected) return;
@@ -87,7 +117,10 @@ export default function HomeScreen() {
     // Reuse local join logic, then navigate with group params
     await joinQueue();
     setJoinModalVisible(false);
-    const soloSuffix = (currentUserId || "user").toString().slice(0, 6).toUpperCase();
+    const soloSuffix = (currentUserId || "user")
+      .toString()
+      .slice(0, 6)
+      .toUpperCase();
     const groupId = `GROUP-SOLO-${soloSuffix}`;
     router.push({
       pathname: "/myrun",
@@ -158,136 +191,164 @@ export default function HomeScreen() {
   const Courts = () => (
     <View style={styles.container}>
       <View style={styles.header}>
-  <Image source={require("../../assets/gator.png")} style={styles.topIcon} />
+        <Image
+          source={require("../../assets/gator.png")}
+          style={styles.topIcon}
+        />
         <Text style={styles.h1}>Who’s Got Next?</Text>
         <Text style={styles.subtle}>Select your court to queue up.</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.gridWrap}>
         <View style={styles.grid}>
-          {COURTS.map((court) => (
-            <Pressable
-              key={court.id}
-              onPress={() => {
-                setSelected(court);
-                setCurrent("details");
-              }}
-              style={styles.card}
-            >
-              <Text style={styles.cardTitle}>Court {court.number}</Text>
+          {loading ? (
+            <Text>Loading courts...</Text>
+          ) : error ? (
+            <Text style={{ color: "red" }}>{error}</Text>
+          ) : (
+            courts.map((court) => (
+              <Pressable
+                key={court.id}
+                onPress={() => {
+                  setSelected(court);
+                  setCurrent("details");
+                }}
+                style={styles.card}
+              >
+                <Text style={styles.cardTitle}>Court {court.name}</Text>
+                <Text>{court.location}</Text>
 
-              <View style={{ marginBottom: 12 }}>
-                <Text
+                <View style={{ marginBottom: 12 }}>
+                  <Text
+                    style={[
+                      styles.waitingNum,
+                      { color: court.waiting === 0 ? "#10B981" : "#FF7A00" },
+                    ]}
+                  >
+                    {court.waiting}
+                  </Text>
+                  <Text style={styles.waitingLabel}>Waiting</Text>
+                </View>
+
+                <View
                   style={[
-                    styles.waitingNum,
-                    { color: court.waiting === 0 ? "#10B981" : "#FF7A00" },
+                    styles.pill,
+                    { backgroundColor: statusColor(court.status) },
                   ]}
                 >
-                  {court.waiting}
-                </Text>
-                <Text style={styles.waitingLabel}>Waiting</Text>
-              </View>
+                  <Text style={styles.pillText}>
+                    {statusLabel(court.status)}
+                  </Text>
+                </View>
 
-              <View
-                style={[
-                  styles.pill,
-                  { backgroundColor: statusColor(court.status) },
-                ]}
-              >
-                <Text style={styles.pillText}>{statusLabel(court.status)}</Text>
-              </View>
-
-              <View
-                style={[
-                  styles.joinBtn,
-                  court.status === "full"
-                    ? { backgroundColor: "#e5e7eb" }
-                    : { backgroundColor: "#f97316" },
-                ]}
-              >
-                <Text
+                <Pressable
+                  onPress={() => {
+                    if (court.status !== "full") {
+                      router.push({
+                        pathname: "/courtDetails",
+                        params: {
+                          id: String(court.id),
+                          name: court.name,
+                          location: court.location,
+                          status: court.status,
+                        },
+                      });
+                    }
+                  }}
+                  disabled={court.status === "full"}
                   style={[
-                    styles.joinText,
+                    styles.joinBtn,
                     court.status === "full"
-                      ? { color: "#9ca3af" }
-                      : { color: "#fff" },
+                      ? { backgroundColor: "#e5e7eb" }
+                      : { backgroundColor: "#f97316" },
                   ]}
                 >
-                  {court.status === "full" ? "FULL" : "JOIN"}
-                </Text>
-              </View>
-            </Pressable>
-          ))}
+                  <Text
+                    style={[
+                      styles.joinText,
+                      court.status === "full"
+                        ? { color: "#9ca3af" }
+                        : { color: "#fff" },
+                    ]}
+                  >
+                    {court.status === "full" ? "FULL" : "JOIN"}
+                  </Text>
+                </Pressable>
+              </Pressable>
+            ))
+          )}
         </View>
       </ScrollView>
     </View>
   );
 
-  const Details = () => {
-    if (!selected) return null;
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => setCurrent("courts")}
-            style={styles.backRow}
-          >
-            <Ionicons name="chevron-back" size={20} color="#f97316" />
-            <Text style={styles.backText}>Back</Text>
-          </Pressable>
+  // const Details = () => {
+  //   if (!selected) return null;
+  //   return (
+  //     courts.map((court) => (
+  //     <View style={styles.container}>
+  //       <View style={styles.header}>
+  //         <Pressable
+  //           onPress={() => setCurrent("courts")}
+  //           style={styles.backRow}
+  //         >
+  //           <Ionicons name="chevron-back" size={20} color="#f97316" />
+  //           <Text style={styles.backText}>Back</Text>
+  //         </Pressable>
 
-          <Text style={styles.h1}>Court {selected.number}</Text>
+  //         <Text style={styles.h1}>Court {court.name}</Text>
 
-          <View style={styles.statsCard}>
-            <View style={{ alignItems: "center", marginBottom: 12 }}>
-              <Text style={styles.bigOrange}>{selected.waiting}</Text>
-              <Text style={styles.mediumGray}>players waiting</Text>
-            </View>
+  //         <View style={styles.statsCard}>
+  //           <View style={{ alignItems: "center", marginBottom: 12 }}>
+  //             <Text style={styles.bigOrange}>{selected.waiting}</Text>
+  //             <Text style={styles.mediumGray}>players waiting</Text>
+  //           </View>
 
-            <View style={styles.rowCenter}>
-              <Ionicons name="time-outline" size={18} color="#4b5563" />
-              <Text style={styles.mediumGray}> ETA ~{selected.eta}m</Text>
-            </View>
-          </View>
+  //           <View style={styles.rowCenter}>
+  //             <Ionicons name="time-outline" size={18} color="#4b5563" />
+  //             <Text style={styles.mediumGray}> ETA ~{selected.eta}m</Text>
+  //           </View>
+  //         </View>
 
-          <View style={styles.panel}>
-            <Text style={styles.panelTitle}>Up Next</Text>
-            <View style={{ gap: 6 }}>
-              <Text style={styles.mediumGray}>Jay, Marcus, Leo</Text>
-              <Text style={styles.mediumGray}>DeAndre, Sarah</Text>
-            </View>
-          </View>
-        </View>
+  //         <View style={styles.panel}>
+  //           <Text style={styles.panelTitle}>Up Next</Text>
+  //           <View style={{ gap: 6 }}>
+  //             <Text style={styles.mediumGray}>Jay, Marcus, Leo</Text>
+  //             <Text style={styles.mediumGray}>DeAndre, Sarah</Text>
+  //           </View>
+  //         </View>
+  //       </View>
 
-        <View style={styles.footerButtons}>
-          <Pressable
-            onPress={() => setJoinModalVisible(true)}
-            disabled={selected.status === "full"}
-            style={[
-              styles.primaryBtn,
-              selected.status === "full" && styles.primaryBtnDisabled,
-            ]}
-          >
-            <Text
-              style={[
-                styles.primaryBtnText,
-                selected.status === "full" && { color: "#9ca3af" },
-              ]}
-            >
-              {selected.status === "full" ? "Court Full" : "Join Queue"}
-            </Text>
-          </Pressable>
+  //       <View style={styles.footerButtons}>
+  //         <Pressable
+  //           onPress={() => setJoinModalVisible(true)}
+  //           disabled={selected.status === "full"}
+  //           style={[
+  //             styles.primaryBtn,
+  //             selected.status === "full" && styles.primaryBtnDisabled,
+  //           ]}
+  //         >
+  //           <Text
+  //             style={[
+  //               styles.primaryBtnText,
+  //               selected.status === "full" && { color: "#9ca3af" },
+  //             ]}
+  //           >
+  //             {selected.status === "full" ? "Court Full" : "Join Queue"}
+  //           </Text>
+  //         </Pressable>
 
-          <Pressable
-            onPress={() => setCurrent("courts")}
-            style={styles.ghostBtn}
-          >
-            <Text style={styles.ghostBtnText}>Cancel</Text>
-          </Pressable>
-        </View>
-      </View>
-    );
-  };
+  //         <Pressable
+  //           onPress={() => setCurrent("courts")}
+  //           style={styles.ghostBtn}
+  //         >
+  //           <Text style={styles.ghostBtnText}>Cancel</Text>
+  //         </Pressable>
+  //       </View>
+  //     </View>
+  //     ))
+  //   );
+  // };
 
   /* MyRun page now lives in its own route: frontend/src/app/myrun.tsx */
 
@@ -309,7 +370,7 @@ export default function HomeScreen() {
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => router.push('/myrun')} style={styles.navItem}>
+      <Pressable onPress={() => router.push("/myrun")} style={styles.navItem}>
         <Ionicons
           name="time-outline"
           size={26}
@@ -337,11 +398,11 @@ export default function HomeScreen() {
   return (
     <View style={styles.screenWrap}>
       <View style={{ flex: 1 }}>
-  {current === "courts" && <Courts />}
-  {current === "details" && <Details />}
-  {/* Profile handled by separate /profile route */}
+        {current === "courts" && <Courts />}
+        {/* {current === "details" && <Details />} */}
+        {/* Profile handled by separate /profile route */}
       </View>
-  <BottomNavAny homeTab={current} />
+      <BottomNavAny homeTab={current} />
       {/* Join Queue Modal */}
       <JoinQueueModal
         visible={joinModalVisible}
