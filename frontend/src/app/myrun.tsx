@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import BottomNav from "./componets/BottomNav";
 const BottomNavAny: any = BottomNav;
 
@@ -23,6 +23,18 @@ type QueueState = {
 
 export default function MyRunPage() {
   const [queue, setQueue] = useState<QueueState | null>(null);
+  const params = useLocalSearchParams<{
+    courtId?: string;
+    groupId?: string;
+    groupName?: string;
+    groupSize?: string; // expo-router passes strings
+    isSolo?: string;
+    isGroup?: string;
+  }>();
+
+  const groupNameParam = params?.groupName || "Your group";
+  const groupIdParam = params?.groupId || "GROUP-PLACEHOLDER-0000";
+  const groupSizeNum = Number(params?.groupSize ?? "1") || 1;
 
   useEffect(() => {
     const load = async () => {
@@ -66,6 +78,12 @@ export default function MyRunPage() {
               <View style={styles.progressTrack}>
                 <View style={styles.progressFill} />
               </View>
+            </View>
+
+            {/* Group Info */}
+            <View style={styles.groupInfo}>
+              <Text style={styles.groupTitle}>{groupNameParam} - {groupSizeNum}</Text>
+              <Text style={styles.groupId}>{groupIdParam}</Text>
             </View>
 
             {queue.position <= 2 && (
@@ -160,4 +178,9 @@ const styles = StyleSheet.create({
   navLabel: { fontSize: 11, fontWeight: "800", color: "#9ca3af" },
   navActive: { color: "#f97316" },
   navAvatar: { width: 28, height: 28, borderRadius: 999, alignItems: "center", justifyContent: "center" },
+  
+  // Group info styles
+  groupInfo: { marginBottom: 16, paddingVertical: 8 },
+  groupTitle: { fontSize: 18, fontWeight: "bold" },
+  groupId: { marginTop: 2, color: "#4b5563" },
 });

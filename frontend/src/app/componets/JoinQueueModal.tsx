@@ -57,8 +57,8 @@ export default function JoinQueueModal({
               <Text style={styles.info}>Group id (placeholder):</Text>
               <Text style={styles.bold}>{placeholderGroupId}</Text>
               <View style={styles.rowGutter}>
-                <Button title="OK" onPress={() => { onCreateGroup(groupName, placeholderGroupId); setMode('menu'); }} />
                 <Button title="Back" onPress={() => setMode('menu')} />
+                <Button title="Create" onPress={() => { onCreateGroup(groupName, placeholderGroupId); setMode('menu'); }} />
               </View>
             </>
           )}
@@ -75,8 +75,8 @@ export default function JoinQueueModal({
                 autoCorrect={false}
               />
               <View style={styles.rowGutter}>
-                <Button title="OK" onPress={() => { if (joinId.trim()) { onJoinGroup(joinId.trim()); setMode('menu'); } }} />
                 <Button title="Back" onPress={() => setMode('menu')} />
+                <Button title="Join" onPress={() => { if (joinId.trim()) { onJoinGroup(joinId.trim()); setMode('menu'); } }} />
               </View>
             </>
           )}
