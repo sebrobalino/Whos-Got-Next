@@ -208,11 +208,19 @@ export default function HomeScreen() {
           ) : (
             courts.map((court) => (
               <Pressable
-                key={court.id}
                 onPress={() => {
-                  setSelected(court);
-                  setCurrent("details");
-                }}
+                    if (court.status !== "full") {
+                      router.push({
+                        pathname: "/courtDetails",
+                        params: {
+                          id: String(court.id),
+                          name: court.name,
+                          location: court.location,
+                          status: court.status,
+                        },
+                      });
+                    }
+                  }}
                 style={styles.card}
               >
                 <Text style={styles.cardTitle}>Court {court.name}</Text>
@@ -281,78 +289,6 @@ export default function HomeScreen() {
       </ScrollView>
     </View>
   );
-
-  // const Details = () => {
-  //   if (!selected) return null;
-  //   return (
-  //     courts.map((court) => (
-  //     <View style={styles.container}>
-  //       <View style={styles.header}>
-  //         <Pressable
-  //           onPress={() => setCurrent("courts")}
-  //           style={styles.backRow}
-  //         >
-  //           <Ionicons name="chevron-back" size={20} color="#f97316" />
-  //           <Text style={styles.backText}>Back</Text>
-  //         </Pressable>
-
-  //         <Text style={styles.h1}>Court {court.name}</Text>
-
-  //         <View style={styles.statsCard}>
-  //           <View style={{ alignItems: "center", marginBottom: 12 }}>
-  //             <Text style={styles.bigOrange}>{selected.waiting}</Text>
-  //             <Text style={styles.mediumGray}>players waiting</Text>
-  //           </View>
-
-  //           <View style={styles.rowCenter}>
-  //             <Ionicons name="time-outline" size={18} color="#4b5563" />
-  //             <Text style={styles.mediumGray}> ETA ~{selected.eta}m</Text>
-  //           </View>
-  //         </View>
-
-  //         <View style={styles.panel}>
-  //           <Text style={styles.panelTitle}>Up Next</Text>
-  //           <View style={{ gap: 6 }}>
-  //             <Text style={styles.mediumGray}>Jay, Marcus, Leo</Text>
-  //             <Text style={styles.mediumGray}>DeAndre, Sarah</Text>
-  //           </View>
-  //         </View>
-  //       </View>
-
-  //       <View style={styles.footerButtons}>
-  //         <Pressable
-  //           onPress={() => setJoinModalVisible(true)}
-  //           disabled={selected.status === "full"}
-  //           style={[
-  //             styles.primaryBtn,
-  //             selected.status === "full" && styles.primaryBtnDisabled,
-  //           ]}
-  //         >
-  //           <Text
-  //             style={[
-  //               styles.primaryBtnText,
-  //               selected.status === "full" && { color: "#9ca3af" },
-  //             ]}
-  //           >
-  //             {selected.status === "full" ? "Court Full" : "Join Queue"}
-  //           </Text>
-  //         </Pressable>
-
-  //         <Pressable
-  //           onPress={() => setCurrent("courts")}
-  //           style={styles.ghostBtn}
-  //         >
-  //           <Text style={styles.ghostBtnText}>Cancel</Text>
-  //         </Pressable>
-  //       </View>
-  //     </View>
-  //     ))
-  //   );
-  // };
-
-  /* MyRun page now lives in its own route: frontend/src/app/myrun.tsx */
-
-  /* Profile view moved to dedicated `profile.tsx` file. */
 
   const BottomNav = () => (
     <View style={styles.navBar}>

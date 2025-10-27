@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Alert } from 'react-native';
-const BASE_URL = "10.136.104.150:3001"
+const BASE_URL = "10.136.117.21:3001"
 
 const CreateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
