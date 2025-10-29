@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { Alert } from 'react-native';
-const BASE_URL = "10.136.117.21:3001"
+const BASE_URL = "10.136.232.41:3001"
 
 const CreateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
@@ -69,7 +69,7 @@ export async function createUser(user: { name: string; email: string; password: 
     throw new Error(msgs.join('\n')); // stop before fetch
   }
 
-  const res = await fetch(`${BASE_URL}/users/`, {
+  const res = await fetch(`http://${BASE_URL}/users/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(parsed.data),
