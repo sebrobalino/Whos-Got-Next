@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, Button, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import {createGroup, addUserToGroup} from '../services/groupService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type JoinQueueModalProps = {
   visible: boolean;
@@ -29,6 +31,74 @@ export default function JoinQueueModal({
     onClose();
   };
 
+     const [user, setUser] = useState<{name: string, email: string, id: number} | null>(null);
+
+    useEffect(() => {
+        const loadUser = async () => {
+            const storedUser = await AsyncStorage.getItem("user");
+            if (storedUser) {
+                setUser(JSON.parse(storedUser))
+            }
+        }
+        loadUser();
+    }, []);
+
+  const handleCreateGroup = async () => {
+  if (!user) return;
+
+  try {
+    // 1️⃣ Create the group
+    const newGroup = await createGroup({ group_name: `${user.name}'s Group` });
+    console.log('✅ Group created:', newGroup);
+
+    // 2️⃣ Automatically add the creator to their group
+    // Assuming newGroup has an 'id' property
+    if (newGroup?.id) {
+      await addUserToGroup(newGroup.id, user.id);
+      console.log(` ${user.name} added to group ${newGroup.id}`);
+    }
+
+    setMode('menu');
+  } catch (error) {
+    console.error('Error creating or joining group:', error);
+  }
+};
+
+
+ const handleSolo = async () => {
+   if (!user) return;
+
+  try {
+    // 1️⃣ Create the group
+    const newGroup = await createGroup({ group_name: `${user.name}` });
+    console.log('✅ Group created:', newGroup);
+
+    // 2️⃣ Automatically add the creator to their group
+    // Assuming newGroup has an 'id' property
+    if (newGroup?.id) {
+      await addUserToGroup(newGroup.id, user.id);
+      console.log(` ${user.name} added to group ${newGroup.id}`);
+    }
+
+    setMode('menu');
+  } catch (error) {
+    console.error('Error creating or joining group:', error);
+  }
+  };
+
+const handleJoinGroup = async () => {
+  if (!joinId.trim()) return;
+
+  try {
+    await addUserToGroup(Number(joinId.trim()), Number(user?.id));
+    console.log('✅ Joined group:', joinId);
+    setMode('menu');
+  } catch (error) {
+    console.error(' Error joining group:', error);
+  }
+};
+
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.backdrop}>
@@ -36,10 +106,10 @@ export default function JoinQueueModal({
           {mode === 'menu' && (
             <>
               <Text style={styles.title}>Join Queue</Text>
-              <TouchableOpacity style={styles.option} onPress={() => { onSolo(); }}>
+              <TouchableOpacity style={styles.option} onPress={() => { handleSolo() }}>
                 <Text style={styles.optionText}>Solo</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.option} onPress={() => setMode('create')}>
+              <TouchableOpacity style={styles.option} onPress={() => handleCreateGroup() }>
                 <Text style={styles.optionText}>New Group</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.option} onPress={() => setMode('join')}>
@@ -76,7 +146,7 @@ export default function JoinQueueModal({
               />
               <View style={styles.rowGutter}>
                 <Button title="Back" onPress={() => setMode('menu')} />
-                <Button title="Join" onPress={() => { if (joinId.trim()) { onJoinGroup(joinId.trim()); setMode('menu'); } }} />
+                <Button title="Join" onPress={() => { if (joinId.trim()) { handleJoinGroup(); setMode('menu'); } }} />
               </View>
             </>
           )}
