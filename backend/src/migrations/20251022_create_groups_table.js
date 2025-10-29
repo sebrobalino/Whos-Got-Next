@@ -8,6 +8,7 @@ export async function up() {
         group_name VARCHAR(100) NOT NULL,
         court_id INT REFERENCES Courts(id) on DELETE SET NULL,
         priority BOOLEAN DEFAULT FALSE,
+        queued_at TIMESTAMP DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -20,7 +21,7 @@ export async function alter() {
   try {
     await db.query(`
         ALTER TABLE groups
-        ADD COLUMN status VARCHAR(20) DEFAULT 'queued';
+        ADD COLUMN queued_at TIMESTAMP DEFAULT NULL;
         `)
   } 
   catch (error) {

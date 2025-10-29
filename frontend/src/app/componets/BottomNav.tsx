@@ -1,62 +1,88 @@
+// app/componets/BottomNav.tsx
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useSegments } from "expo-router";
+import { router, usePathname } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = {
-  homeTab?: "courts" | "details" | "myrun";
+  // Optional override from parent (useful on the Home stack)
+  homeTab?: "courts" | "details" | "group" | "groups";
 };
 
 export default function BottomNav({ homeTab }: Props) {
-  const segments = useSegments();
+  const pathname = usePathname(); // e.g. "/", "/home", "/groups", "/profile", "/court/2", "/courtDetails"
   const [initials, setInitials] = useState<string>("JDs");
 
   useEffect(() => {
     const load = async () => {
       try {
         const raw = await AsyncStorage.getItem("user");
-        if (raw) {
-          const user = JSON.parse(raw);
-          const name: string = user?.name || "";
-          if (name.length === 0) return setInitials("JDs");
-          const parts = name.trim().split(" ");
-          const initialsStr = parts.length === 1
+        if (!raw) return setInitials("JDs");
+        const user = JSON.parse(raw);
+        const name: string = user?.name || "";
+        if (!name) return setInitials("JDs");
+        const parts = name.trim().split(/\s+/);
+        const initialsStr =
+          parts.length === 1
             ? parts[0].slice(0, 2).toUpperCase()
             : (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-          setInitials(initialsStr);
-        }
-      } catch (e) {
-        // keep default
+        setInitials(initialsStr);
+      } catch {
+        setInitials("JDs");
       }
     };
     load();
   }, []);
 
-  // Determine active states. If on the Home route, allow parent to pass homeTab
-  const segArr = segments as string[];
-  const onHomeRoute = segArr.length === 0 || segArr[0] === "home";
-  const activeCourts = homeTab ? (homeTab === "courts" || homeTab === "details") : onHomeRoute;
-  const activeMyRun = homeTab ? homeTab === "myrun" : segArr.includes("myrun");
-  const activeProfile = segArr.includes("profile");
+  // Active tab logic (robust to nesting)
+  const activeCourts = homeTab
+    ? homeTab === "courts" || homeTab === "details"
+    : pathname === "/" ||
+      pathname.startsWith("/home") ||
+      pathname.startsWith("/court") ||      // covers /court/[id]
+      pathname === "/courtDetails";         // your non-dynamic details page
+
+  const activeGroup = homeTab
+    ? homeTab === "groups" || homeTab === "group"
+    : pathname.startsWith("/groups");
+
+  const activeProfile = pathname.startsWith("/profile");
 
   return (
     <View style={styles.navBar}>
       <Pressable onPress={() => router.push("/home")} style={styles.navItem}>
         <Text style={{ fontSize: 22, opacity: activeCourts ? 1 : 0.4 }}>🏀</Text>
-        <Text style={[styles.navLabel, activeCourts ? styles.navActive : null]}>Courts</Text>
+        <Text style={[styles.navLabel, activeCourts ? styles.navActive : null]}>
+          Courts
+        </Text>
       </Pressable>
 
-      <Pressable onPress={() => router.push("/myrun")} style={styles.navItem}>
-        <Ionicons name="time-outline" size={26} color={activeMyRun ? "#f97316" : "#d1d5db"} />
-        <Text style={[styles.navLabel, activeMyRun ? styles.navActive : null]}>My Run</Text>
+      <Pressable onPress={() => router.push("/groups")} style={styles.navItem}>
+        <Ionicons
+          name="time-outline"
+          size={26}
+          color={activeGroup ? "#f97316" : "#d1d5db"}
+        />
+        <Text style={[styles.navLabel, activeGroup ? styles.navActive : null]}>
+          Groups
+        </Text>
       </Pressable>
 
       <Pressable onPress={() => router.push("/profile")} style={styles.navItem}>
-        <View style={[styles.navAvatar, activeProfile ? { backgroundColor: "#f97316" } : { backgroundColor: "#d1d5db" }]}>
-          <Text style={{ fontWeight: "700", color: activeProfile ? "#fff" : "#6b7280" }}>{initials}</Text>
+        <View
+          style={[
+            styles.navAvatar,
+            activeProfile ? { backgroundColor: "#f97316" } : { backgroundColor: "#d1d5db" },
+          ]}
+        >
+          <Text style={{ fontWeight: "700", color: activeProfile ? "#fff" : "#6b7280" }}>
+            {initials}
+          </Text>
         </View>
-        <Text style={[styles.navLabel, activeProfile ? styles.navActive : null]}>Profile</Text>
+        <Text style={[styles.navLabel, activeProfile ? styles.navActive : null]}>
+          Profile
+        </Text>
       </Pressable>
     </View>
   );

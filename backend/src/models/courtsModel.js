@@ -2,7 +2,7 @@ import db from '../config/db.js';
 
 export const CourtsModel= {
     async getAll(){
-        const result = await db.query('SELECT * from Courts ORDER BY name DESC');
+        const result = await db.query('SELECT * from Courts ORDER BY name ASC');
         return result.rows;
     },
 
