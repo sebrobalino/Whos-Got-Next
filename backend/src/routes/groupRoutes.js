@@ -13,7 +13,7 @@ router.post('/:groupId/leave-court', GroupController.leaveCourt);
 router.post('/:id/endgame', GroupController.handleEndgame);
 router.delete('/:id', GroupController.deleteGroup);
 router.get('/:id/count', GroupController.getGroupCount);
-router.post('/:id/start', GroupController.startGame);
+router.post('/:id/start', GroupController.startGame); // not working yet
 
 
 export default router;
