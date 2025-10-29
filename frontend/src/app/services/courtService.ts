@@ -1,4 +1,4 @@
-const BASE_URL = "10.136.117.21:3001"
+const BASE_URL = "10.136.232.41:3001"
 
 export async function getCourts() {
     const response = await fetch(`http://${BASE_URL}/courts/`);
