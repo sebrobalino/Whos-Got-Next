@@ -1,4 +1,4 @@
-const BASE_URL = "10.136.239.234:3001"
+const BASE_URL = "10.136.123.188:3001"
 
 export async function getGroups() {
     const response = await fetch(`http://${BASE_URL}/groups/`);

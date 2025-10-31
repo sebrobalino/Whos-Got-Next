@@ -85,4 +85,30 @@ export const CourtController = {
         }
     },
 
+    // backend/src/controllers/courtController.js
+    // controllers/courtController.js
+ async endGameOnCourt(req, res, next) {
+  try {
+    const courtId = Number(req.params.id);
+    const winnerGroupId = Number(req.params.winnerGroupId);
+
+    // one-time helpful debug
+    console.log('[CTRL endGame] params:', req.params);
+
+    if (!Number.isFinite(courtId) || !Number.isFinite(winnerGroupId)) {
+      return res.status(400).json({ message: 'Invalid ids' });
+    }
+
+    const result = await CourtsService.endGameOnCourt(courtId, winnerGroupId);
+    if (result?.error) {
+      return res.status(result.statusCode || 400).json({ message: result.error });
+    }
+    return res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+
 }

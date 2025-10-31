@@ -4,30 +4,33 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { View, Text, Pressable, Alert, ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { globalStyles as styles } from "./styles/globalStyles";
-import {getQueuedCourtsByID, getActiveCourtsByID,} from "./services/courtService";
+import {getQueuedCourtsByID, getActiveCourtsByID, endGameOnCourt} from "./services/courtService";
 import { joinCourt, leaveCourt } from "./services/groupService";
 
 type QueuedGroup = {
-  id: number;
+  id: string;
   group_name: string;
   court_id: number;
   priority: boolean;
   created_at: string;
   status: string;
   queued_at: string | null;
+  captain_id?: string;
 };
 
 type ActiveGroup = {
-  id: number;
+  id: string;
   group_name: string;
   court_id: number;
   priority: boolean;
   created_at: string;
   status: string;
   queued_at: string | null;
+  captain_id?: string;
+
 };
 
-type StoredUser = { name: string; email: string; group_id: number };
+type StoredUser = { name: string; id: string; email: string; group_id: string };
 
 export default function CourtDetails() {
   const router = useRouter();
@@ -50,13 +53,19 @@ export default function CourtDetails() {
   const [errorQueued, setErrorQueued] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [ending, setEnding] = useState(false);
 
-  // const activeGroups = React.useMemo(
-  //   () => queuedGroups.filter((g) => g.status === "active").slice(0, 2),
-  //   [queuedGroups]
-  // );
+  const canEndGame = useMemo(() => {
+  if (!user?.id || !user.group_id || activeGroups.length === 0) return false;
 
-  // Load user (to get group_id)
+  const mine = activeGroups.find(
+    (g) => g.id === user.group_id && g.status === 'active' && g.court_id === court?.id
+  );
+  if (!mine) return false;
+
+  return typeof mine.captain_id === 'number' && mine.captain_id === user.id;
+}, [user?.id, user?.group_id, activeGroups, court?.id]);
+
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -115,7 +124,6 @@ export default function CourtDetails() {
     }
   };
 
-  // Join queue
   const handleJoinQueue = async () => {
     if (!court?.id) {
       Alert.alert("Error", "Missing court ID");
@@ -142,7 +150,6 @@ export default function CourtDetails() {
     }
   };
 
-  // Leave queue
   const handleLeaveQueue = async () => {
     const groupId = user?.group_id;
     if (typeof groupId !== "number") {
@@ -164,6 +171,56 @@ export default function CourtDetails() {
       setLeaving(false);
     }
   };
+
+const handleEndGame = () => {
+  if (!court?.id) return;
+
+  const contenders = activeGroups.filter(
+    (g) => g.court_id === court.id && g.status === "active"
+  );
+
+  if (contenders.length !== 2) {
+    Alert.alert("Cannot end game", "Exactly two active groups must be on this court.");
+    return;
+  }
+
+  const [A, B] = contenders; // two active groups
+
+  Alert.alert(
+    "Who won?",
+    `Select the winning group for Court ${court.name}.`,
+    [
+      {
+        text: A.group_name,
+        onPress: async () =>
+          finalizeEndGame(Number(court.id), Number(A.id)),  // 👈 pass real ids
+      },
+      {
+        text: B.group_name,
+        onPress: async () =>
+          finalizeEndGame(Number(court.id), Number(B.id)),  // 👈 pass real ids
+      },
+      { text: "Cancel", style: "cancel" },
+    ]
+  );
+};
+
+async function finalizeEndGame(courtId: number, winnerGroupId: number) {
+  try {
+    console.log("[END GAME] →", { courtId, winnerGroupId });
+    const res = await endGameOnCourt(courtId, winnerGroupId);
+    console.log("[END GAME] ✓", res);
+    Alert.alert("Success", res?.message || "Game ended successfully.");
+    await getGroupsActive();
+    await getGroupsQueued();
+  } catch (err: any) {
+    console.error("[END GAME] ✗", err);
+    Alert.alert("Error", err?.message || "Failed to end game.");
+  }
+}
+
+
+
 
   // Initial load / refresh on court change
   useEffect(() => {
@@ -350,6 +407,16 @@ export default function CourtDetails() {
                 : `Leave Queue`}
             </Text>
           </Pressable>
+
+          {/* End Game - only for captains of active groups */}
+          {canEndGame && (
+  <Pressable onPress={handleEndGame} style={[styles.primaryBtn]} disabled={ending}>
+    <Text style={[styles.primaryBtnText, ending && { color: "#9ca3af" }]}>
+      {ending ? "Ending..." : "End Game"}
+    </Text>
+  </Pressable>
+)}
+
         </View>
       </View>
     </View>
