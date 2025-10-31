@@ -4,8 +4,8 @@ import { GroupService } from "../services/groupService.js";
 export const GroupController = {
     async createGroup(req, res, next){
         try{
-            const {group_name} = req.body;
-            const newGroup = await GroupService.createGroup (group_name);
+            const {group_name, captain_id} = req.body;
+            const newGroup = await GroupService.createGroup (group_name, captain_id);
             res.status(201).json(newGroup);
         }catch (error){
             next (error);
