@@ -67,6 +67,22 @@ export const GroupsModel = {
             [groupId]
         );
         return parseInt(result.rows[0].user_count, 10);
+    },
+
+    async getGroupMembers(groupId) {
+        const result = await db.query(
+            'SELECT * FROM usertest WHERE group_id = $1',
+            [groupId]
+        );
+        return result.rows;
+    },
+
+    async leaveGroup(userId) {
+        const result = await db.query(
+            'UPDATE usertest SET group_id = NULL WHERE id = $1 RETURNING *',
+            [userId]
+        );
+        return result.rows[0];
     }
 
 }

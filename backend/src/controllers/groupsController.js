@@ -103,5 +103,28 @@ export const GroupController = {
             next(error);
         }   
 
-    }
+    },
+
+    async getGroupMembers(req, res, next) {
+        try {
+            const groupId = parseInt(req.params.id, 10);
+            const members = await GroupService.getGroupMembers(groupId);
+            res.status(200).json(members);
+
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    async leaveGroup(req, res, next) {
+        try {
+            const userId = parseInt(req.params.id, 10);
+            const result = await GroupService.leaveGroup(userId);
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+
 };

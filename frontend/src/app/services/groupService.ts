@@ -1,4 +1,4 @@
-const BASE_URL = "10.136.140.198:3001"
+const BASE_URL = "10.136.239.234:3001"
 
 export async function getGroups() {
     const response = await fetch(`http://${BASE_URL}/groups/`);
@@ -83,3 +83,26 @@ export async function getGroupCount(id: number) {
     }
     return response.json();
 }
+
+export async function getGroupMembers(id: number) {
+    const response = await fetch(`http://${BASE_URL}/groups/${id}/members`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}
+
+export async function leaveGroup(id: number) {
+    const response = await fetch(`http://${BASE_URL}/groups/${id}/leave`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}
+
+
