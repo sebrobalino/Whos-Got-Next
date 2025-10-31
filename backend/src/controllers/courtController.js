@@ -53,6 +53,17 @@ export const CourtController = {
 
     },
 
+    async getActiveCourtsByID(req, res, next){
+        try{
+            const courtId = parseInt(req.params.id, 10);
+            const queuedGroups = await CourtsService.getActiveCourtsByID(courtId);
+            res.status(200).json(queuedGroups);
+        }catch (error){
+            next(error);
+        }
+
+    },
+
     async startGame(req, res, next) {
         try {
             const courtId = parseInt(req.params.id, 10);

@@ -74,6 +74,18 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [user, setUser] = useState<{name: string, email: string, group_id: number} | null>(null);
+
+    useEffect(() => {
+        const loadUser = async () => {
+            const storedUser = await AsyncStorage.getItem("user");
+            if (storedUser) {
+                setUser(JSON.parse(storedUser))
+            }
+        }
+        loadUser();
+    }, []);
+
   useEffect(() => {
     async function loadCourts() {
       try {
