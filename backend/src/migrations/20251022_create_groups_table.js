@@ -8,8 +8,8 @@ export async function up() {
         group_name VARCHAR(100) NOT NULL,
         court_id INT REFERENCES Courts(id) on DELETE SET NULL,
         priority BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         queued_at TIMESTAMP DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
   } catch (error) {

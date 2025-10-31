@@ -103,6 +103,11 @@ export const CourtsService = {
 
     async getPlayersWaiting(court_id){
         return CourtsModel.getPlayersWaiting(court_id);
+    },
+
+    // backend/src/services/courtsService.js
+    async endGameOnCourt(id, winnerId){
+        return CourtsModel.endGameOnCourt(id, winnerId);
     }
     
 
