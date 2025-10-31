@@ -35,6 +35,11 @@ export const CourtsModel= {
         return result.rows;
     },
 
+    async getActiveCourtsByID(court_id){
+        const result = await db.query('SELECT * from Groups WHERE court_id = $1 AND status = $2 ORDER by created_at', [court_id, 'active']);
+        return result.rows;
+    },
+
     // async setCourtStatus(id, status){
     //     const result = await db.query(
     //         'UPDATE courts SET status = $1 WHERE id = $2 RETURNING *',

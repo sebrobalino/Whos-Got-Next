@@ -26,6 +26,10 @@ export const CourtsService = {
         return CourtsModel.getQueuedCourtsByID(court_id);
     },
 
+    async getActiveCourtsByID(court_id){
+        return CourtsModel.getActiveCourtsByID(court_id);
+    },
+
     async startGame(courtId) {
     // 1. Get all active players on this court ordered by join time
     const playersResult = await db.query(`
