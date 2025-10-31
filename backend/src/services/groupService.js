@@ -143,6 +143,15 @@ export const GroupService = {
     return { message: 'Not enough players to start game' };
     },
 
+    async getGroupMembers(groupId) {
+        return GroupsModel.getGroupMembers(groupId);
+    },
+
+    async leaveGroup(userId) {
+        return GroupsModel.leaveGroup(userId);
+    }
+
+
 
     
 

@@ -14,6 +14,8 @@ router.post('/:id/endgame', GroupController.handleEndgame);
 router.delete('/:id', GroupController.deleteGroup);
 router.get('/:id/count', GroupController.getGroupCount);
 router.post('/:id/start', GroupController.startGame); // not working yet
+router.get('/:id/members', GroupController.getGroupMembers); // New route for getting group members
+router.post('/:id/leave', GroupController.leaveGroup); // New route for leaving a group
 
 
 export default router;
