@@ -1,13 +1,15 @@
 import db from "../config/db.js";
 
 export const GroupsModel = {
-  async createGroup(group_name){
-        const result = await db.query (
-            'INSERT INTO Groups (group_name,priority,court_id) VALUES ($1, $2, $3) RETURNING *',
-            [group_name, false, null]
-        );
-        return result.rows[0];
-    },
+  async createGroup(group_name, captain_id) {
+    const result = await db.query(
+        `INSERT INTO Groups (group_name, priority, court_id, captain_id)
+         VALUES ($1, $2, $3, $4)
+         RETURNING *`,
+        [group_name, false, null, captain_id]
+    );
+    return result.rows[0];
+  },
 
   async getAllGroups() {
     const result = await db.query(

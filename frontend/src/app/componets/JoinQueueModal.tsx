@@ -54,7 +54,7 @@ export default function JoinQueueModal({
 
   try {
     // 1️⃣ Create the group
-    const newGroup = await createGroup({ group_name: `${user.name}'s Group` });
+    const newGroup = await createGroup({ group_name: `${user.name}'s Group`, captain_id: user.id });
     console.log('✅ Group created:', newGroup);
 
     // 2️⃣ Automatically add the creator to their group

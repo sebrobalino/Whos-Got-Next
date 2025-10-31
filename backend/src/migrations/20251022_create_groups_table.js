@@ -21,7 +21,7 @@ export async function alter() {
   try {
     await db.query(`
         ALTER TABLE groups
-        ADD COLUMN queued_at TIMESTAMP DEFAULT NULL;
+        ADD COLUMN captain_id INT REFERENCES usertest(id) ON DELETE SET NULL;
         `)
   } 
   catch (error) {

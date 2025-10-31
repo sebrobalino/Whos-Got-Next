@@ -1,4 +1,4 @@
-const BASE_URL = "10.136.123.188:3001"
+const BASE_URL = "10.136.239.234:3001"
 
 export async function getGroups() {
     const response = await fetch(`http://${BASE_URL}/groups/`);
@@ -17,7 +17,7 @@ export async function getGroupById(id: number) {
 } 
 
 
-export async function createGroup(group: { group_name: string }) {
+export async function createGroup(group: { group_name: string, captain_id?: number }) {
     const response = await fetch(`http://${BASE_URL}/groups/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

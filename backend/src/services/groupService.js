@@ -6,8 +6,8 @@ export const GroupService = {
     return GroupsModel.addUserToGroup(userId, groupId);
   },
 
-  async createGroup(group_name) {
-    return GroupsModel.createGroup(group_name);
+  async createGroup(group_name, captain_id) {
+    return GroupsModel.createGroup(group_name, captain_id);
   },
 
   // async createGroup(group_name = "Solo"){

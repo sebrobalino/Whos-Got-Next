@@ -357,14 +357,7 @@ export default function HomeScreen() {
       </View>
       <BottomNavAny homeTab={current} />
       {/* Join Queue Modal */}
-      <JoinQueueModal
-        visible={joinModalVisible}
-        onClose={() => setJoinModalVisible(false)}
-        onSolo={handleSolo}
-        onCreateGroup={handleCreateGroup}
-        onJoinGroup={handleJoinGroup}
-        currentUserName={currentUserName}
-      />
+     
     </View>
   );
 }
