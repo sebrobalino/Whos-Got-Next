@@ -53,86 +53,72 @@ export default function JoinQueueModal({
   if (!user) return;
 
   try {
-    // 1️⃣ Create the group
     const newGroup = await createGroup({ group_name: `${user.name}'s Group`, captain_id: user.id });
     console.log('✅ Group created:', newGroup);
 
-    // 2️⃣ Automatically add the creator to their group
-    // Assuming newGroup has an 'id' property
     if (newGroup?.id) {
       await addUserToGroup(newGroup.id, user.id);
-      setUser({
-        ...user,
-        group_id: newGroup.id,
-      });
+
+      const updatedUser = { ...user, group_id: newGroup.id };
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser)); // 🟢 persist change
+
       Alert.alert("Success", "Your group has been created.");
-      setTimeout(close, 500);
-      console.log(` ${user.name} added to group ${newGroup.id}`);
+      console.log(`${user.name} added to group ${newGroup.id}`);
     }
 
-    setMode('menu');
+    setTimeout(close, 500);
   } catch (error) {
-    console.error('Error creating or joining group:', error);
+    console.error("❌ Error creating or joining group:", error);
+    Alert.alert("Error", "Could not create group.");
   }
 };
 
 
- const handleSolo = async () => {
-   if (!user) return;
+const handleSolo = async () => {
+  if (!user) return;
 
   try {
-    // 1️⃣ Create the group
     const newGroup = await createGroup({ group_name: `${user.name}` });
-    console.log('Group created:', newGroup);
+    console.log("✅ Solo group created:", newGroup);
 
-    // Automatically add the creator to their group
-    // Assuming newGroup has an 'id' property
     if (newGroup?.id) {
       await addUserToGroup(newGroup.id, user.id);
-      setUser({
-        ...user,
-        group_id: newGroup.id,
-      });
+
+      const updatedUser = { ...user, group_id: newGroup.id };
+      setUser(updatedUser);
+      await AsyncStorage.setItem("user", JSON.stringify(updatedUser)); // 🟢 persist change
+
       Alert.alert("Success", "You have a Solo group.");
-      setTimeout(close, 500);
-      console.log(` ${user.name} added to group ${newGroup.id}`);
+      console.log(`${user.name} added to group ${newGroup.id}`);
     }
 
-    setMode('menu');
+    setTimeout(close, 500);
   } catch (error) {
-    console.error('Error creating or joining group:', error);
+    console.error("❌ Error creating solo group:", error);
   }
-  };
+};
+
 
 const handleJoinGroup = async () => {
   if (!joinId.trim() || !user) return;
 
   try {
     const groupId = Number(joinId.trim());
-    const userId = Number(user.id);
+    await addUserToGroup(groupId, user.id);
 
-    await addUserToGroup(groupId, userId);
-
-    // Create a fully typed updated user
-    const updatedUser = {
-      ...user, // this ensures `name` and `id` are included
-      group_id: groupId,
-    };
-
+    const updatedUser = { ...user, group_id: groupId };
     setUser(updatedUser);
-    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser)); // 🟢 persist change
 
     Alert.alert("Success", "You have joined the group.");
     console.log("✅ Joined group:", groupId);
 
-    setMode("menu");
-    onClose?.();
+    setTimeout(close, 500);
   } catch (error) {
     console.error("❌ Error joining group:", error);
     Alert.alert("Error", "Failed to join group. Please try again.");
   }
-
-  
 };
 
 

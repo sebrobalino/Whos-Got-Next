@@ -63,36 +63,24 @@ export default function GroupsPage() {
 
   const [group, setGroup] = useState<any>(null);
 
-  // ——— JoinQueueModal handlers ———
-  // const handleSolo = async () => {
-  //   // TODO: put your real join logic here
-  //   setJoinModalVisible(false);
-  // };
 
-  // const handleCreateGroup = async (groupName: string, groupId: string) => {
-  //   // TODO: create group then persist queue if needed
-  //   setJoinModalVisible(false);
-  // };
-
-  // const handleJoinGroup = async (groupId: string) => {
-  //   // TODO: join existing group then persist queue if needed
-  //   setJoinModalVisible(false);
-  // };
 
  const handleLeaveGroup = async () => {
   if (!user) return;
 
   try {
-    await leaveGroup(user.id); // updates backend
+    await leaveGroup(user.id); // update backend
     Alert.alert("Success", "You have left the group.");
 
-    // Update local user state so the UI reacts
-    setUser({
-      ...user,
-      group_id: null,
-    });
+    const updatedUser = { ...user, group_id: null };
 
-    // Clear local group info
+    // Update state
+    setUser(updatedUser);
+
+    // 🟢 Persist correct user object
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+
+    // Clear group info
     setGroup(null);
     setGroupMembers([]);
   } catch (error) {
@@ -100,8 +88,6 @@ export default function GroupsPage() {
     Alert.alert("Error", "Could not leave the group. Try again.");
   }
 };
-
-
 
 
   const handleGetGroupByID = async (groupId: number) => {
@@ -172,6 +158,7 @@ useEffect(() => {
 
   loadGroupInfo();
 }, [user?.group_id]); 
+
 
   return (
     <View style={styles.screenWrap}>
