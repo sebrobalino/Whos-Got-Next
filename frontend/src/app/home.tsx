@@ -12,7 +12,7 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { getCourts } from "./services/courtService";
+import { getCourts, getPlayersWaitingCourtsByID } from "./services/courtService";
 import { globalStyles as styles } from "./styles/globalStyles";
 
 const BottomNavAny: any = BottomNav;
@@ -71,6 +71,7 @@ export default function HomeScreen() {
   const currentUserName = "Player";
   const currentUserId = "me-123456"; // TODO: replace with real auth user id
   const [courts, setCourts] = useState<Court[]>([]);
+  const [playersWaitingCount, setPlayersWaitingCount] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,6 +93,28 @@ export default function HomeScreen() {
         setLoading(true);
         const data = await getCourts(); // ✅ using imported function
         setCourts(data);
+
+        // fetch total players waiting for each court and store counts
+        try {
+          const counts = await Promise.all(
+            data.map(async (c: any) => {
+              try {
+                const players = await getPlayersWaitingCourtsByID(c.id);
+                // assume players is an array
+                const total = Array.isArray(players) ? players.length : Number(players) || 0;
+                return { id: c.id, total };
+              } catch (err) {
+                console.warn(`Failed to fetch players waiting for court ${c.id}`, err);
+                return { id: c.id, total: 0 };
+              }
+            })
+          );
+          const map: Record<number, number> = {};
+          counts.forEach((r) => (map[r.id] = r.total));
+          setPlayersWaitingCount(map);
+        } catch (err) {
+          console.warn("Error fetching players waiting counts", err);
+        }
       } catch (err: any) {
         setError(err.message || "Failed to load courts");
       } finally {
@@ -248,7 +271,11 @@ export default function HomeScreen() {
                   >
                     {court.waiting}
                   </Text>
-                  <Text style={styles.waitingLabel}>Waiting</Text>
+                  <Text style={styles.waitingLabel}>Active Players: 10</Text>
+                  {/* show total players waiting (from API) if available, otherwise fall back to court.waiting */}
+                  <Text style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
+                    {`Players waiting: ${playersWaitingCount[court.id] ?? court.waiting}`}
+                  </Text>
                 </View>
 
                 <View
